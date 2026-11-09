@@ -55,6 +55,13 @@ func TestFreeMatchUsesEachSlotRankWithStandardRules(t *testing.T) {
 func TestFreeMatchRejectsInvalidSetup(t *testing.T) {
 	valid := StoryFreeMatchOptions{Size: 2, Arena: "Mannfield", BlueRanks: []int{10}, OrangeRanks: []int{16, 22}}
 	for _, change := range []func(*StoryFreeMatchOptions){
+		func(o *StoryFreeMatchOptions) { o.BlueDrivers = []string{"missing"} },
+		func(o *StoryFreeMatchOptions) { o.OrangeDrivers = []string{"rookie", "rookie"} },
+		func(o *StoryFreeMatchOptions) {
+			o.BlueDrivers = []string{"pro"}
+			o.OrangeDrivers = []string{"pro", "Fury"}
+		},
+		func(o *StoryFreeMatchOptions) { o.BlueDrivers = []string{"rookie", "pro"} },
 		func(o *StoryFreeMatchOptions) { o.Size = 4 }, func(o *StoryFreeMatchOptions) { o.BlueRanks = nil },
 		func(o *StoryFreeMatchOptions) { o.OrangeRanks = []int{10} }, func(o *StoryFreeMatchOptions) { o.OrangeRanks = []int{0, 10} },
 		func(o *StoryFreeMatchOptions) { o.BlueRanks = []int{23} }, func(o *StoryFreeMatchOptions) { o.Arena = "untrusted-map" },
@@ -70,6 +77,26 @@ func TestFreeMatchRejectsInvalidSetup(t *testing.T) {
 	}
 	if _, err := storyFreeMatchConfig(valid, nil, "steam", ""); err == nil {
 		t.Fatal("Missing adjustable bot accepted")
+	}
+}
+
+func TestFreeMatchCharacterIsIndependentFromRankAndRecruitment(t *testing.T) {
+	o := StoryFreeMatchOptions{Size: 2, Arena: "Mannfield", BlueRanks: []int{10}, OrangeRanks: []int{16, 22}, BlueDrivers: []string{"Kira"}, OrangeDrivers: []string{"allstar", "Necto"}}
+	c, err := storyFreeMatchConfig(o, freeMatchTestBots(), "steam", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i, p := range []PlayerJs{c.BluePlayers[1], c.OrangePlayers[0], c.OrangePlayers[1]} {
+		var bot BotInfo
+		if err = json.Unmarshal(p.Player, &bot); err != nil {
+			t.Fatal(err)
+		}
+		name := []string{"Mara Voss", "Jamie Cole", "Avery Stone"}[i]
+		rank := []int{10, 16, 22}[i]
+		car, _ := storyCarForDriver(name)
+		if bot.Config.Settings.Name != name || bot.Loadout.Blue.CarId != car.ID || bot.Loadout.Orange.CarId != car.ID || !strings.Contains(bot.Config.Settings.RunCommand, fmt.Sprintf(" --skill=%d ", rank)) {
+			t.Fatal("Character, car or rank selection lost", bot)
+		}
 	}
 }
 

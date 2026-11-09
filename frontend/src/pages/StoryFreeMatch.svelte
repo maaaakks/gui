@@ -1,11 +1,6 @@
 <script lang="ts">
   import { onMount, untrack } from "svelte";
-  import { App } from "../../bindings/gui";
-  import morgan from "../assets/story/recruits/morgan-v2.png";
-  import casey from "../assets/story/recruits/casey-v2.png";
-  import rowan from "../assets/story/recruits/rowan-v2.png";
-  import lena from "../assets/story/recruits/lena-v2.png";
-  import viktor from "../assets/story/recruits/viktor.png";
+  import { App, type StoryRecruit } from "../../bindings/gui";
 
   let {
     paths,
@@ -13,7 +8,11 @@
     rankNames,
     locked,
     onlaunch,
+    roster,
+    portraits,
   }: {
+    roster: StoryRecruit[];
+    portraits: Record<string, string>;
     paths: string[];
     ranks: Record<string, number>;
     rankNames: string[];
@@ -29,10 +28,6 @@
     ["DFHStadium", "DFH Stadium"],
     ["ChampionsField", "Champions Field"],
   ];
-  const teammates = ["Morgan Vale", "Casey Reed"];
-  const opponents = ["Rowan Hayes", "Lena Cross", "Viktor Rook"];
-  const teammatePortraits = [morgan, casey];
-  const opponentPortraits = [rowan, lena, viktor];
   const initialRank = untrack(() => {
     const rank = ranks["2v2"];
     return rank >= 1 && rank <= 22 ? rank : 7;
@@ -40,6 +35,33 @@
   const storageKey = "RLSTORY_FREE_MATCH_V1";
   let size = $state(2),
     arena = $state("BeckwithPark");
+  let blueDrivers = $state(["rookie", "pro"]);
+  let orangeDrivers = $state(["Beast from the East", "Phoenix CS", "Fury"]);
+  const driver = (id: string) => roster.find((r) => r.id === id);
+  const portrait = (id: string) => portraits[driver(id)?.portrait ?? ""];
+  function activeDrivers() {
+    return [...blueDrivers.slice(0, size - 1), ...orangeDrivers.slice(0, size)];
+  }
+  function ensureUnique() {
+    const seen = new Set<string>();
+    for (const [ids, count] of [
+      [blueDrivers, size - 1],
+      [orangeDrivers, size],
+    ] as [string[], number][]) {
+      for (let i = 0; i < count; i++) {
+        if (!driver(ids[i]) || seen.has(ids[i]))
+          ids[i] = roster.find((r) => !seen.has(r.id))!.id;
+        seen.add(ids[i]);
+      }
+    }
+  }
+  function changeFormat(next: number) {
+    size = next;
+    ensureUnique();
+  }
+  function usedCharacter(id: string, current: string) {
+    return id !== current && activeDrivers().includes(id);
+  }
   let blueRanks = $state([initialRank, initialRank]);
   let orangeRanks = $state([initialRank, initialRank, initialRank]);
   let launching = $state(false),
@@ -67,6 +89,14 @@
         arena = saved.arena;
         blueRanks = saved.blueRanks;
         orangeRanks = saved.orangeRanks;
+        const validDrivers = (ids: unknown, length: number): ids is string[] =>
+          Array.isArray(ids) &&
+          ids.length === length &&
+          ids.every((id) => typeof id === "string" && driver(id));
+        if (validDrivers(saved.blueDrivers, 2)) blueDrivers = saved.blueDrivers;
+        if (validDrivers(saved.orangeDrivers, 3))
+          orangeDrivers = saved.orangeDrivers;
+        ensureUnique();
       }
     } catch {
       /* A malformed local preset should not prevent match creation. */
@@ -80,7 +110,14 @@
       try {
         localStorage.setItem(
           storageKey,
-          JSON.stringify({ size, arena, blueRanks, orangeRanks }),
+          JSON.stringify({
+            size,
+            arena,
+            blueRanks,
+            orangeRanks,
+            blueDrivers,
+            orangeDrivers,
+          }),
         );
       } catch {
         /* Storage is optional. */
@@ -91,6 +128,8 @@
           arena,
           blueRanks: blueRanks.slice(0, size - 1),
           orangeRanks: orangeRanks.slice(0, size),
+          blueDrivers: blueDrivers.slice(0, size - 1),
+          orangeDrivers: orangeDrivers.slice(0, size),
         },
         paths,
         localStorage.getItem("MS_LAUNCHER") ?? "",
@@ -116,7 +155,12 @@
   </header>
   <div class="setup">
     <label
-      >Format<select aria-label="Format" bind:value={size} {disabled}>
+      >Format<select
+        aria-label="Format"
+        value={size}
+        onchange={(e) => changeFormat(Number(e.currentTarget.value))}
+        {disabled}
+      >
         <option value={1}>1v1 · Duel</option><option value={2}
           >2v2 · Doubles</option
         ><option value={3}>3v3 · Standard</option>
@@ -141,10 +185,25 @@
       {#each blueRanks.slice(0, size - 1) as rank, i}
         <div class="player">
           <span class="slot">0{i + 2}</span>
-          <img class="portrait" src={teammatePortraits[i]} alt="" />
-          <div><strong>{teammates[i]}</strong><small>Teammate</small></div>
+          <img class="portrait" src={portrait(blueDrivers[i])} alt="" />
+          <div class="driver-info">
+            <label
+              ><span class="sr-only">Teammate {i + 1} character</span><select
+                aria-label={`Teammate ${i + 1} character`}
+                value={blueDrivers[i]}
+                {disabled}
+                onchange={(e) => (blueDrivers[i] = e.currentTarget.value)}
+                >{#each roster as r}<option
+                    value={r.id}
+                    disabled={usedCharacter(r.id, blueDrivers[i])}
+                    >{r.name}</option
+                  >{/each}</select
+              ></label
+            ><small>{driver(blueDrivers[i])?.carName}</small>
+          </div>
           <label
-            ><span class="sr-only">{teammates[i]} rank</span><select
+            ><span class="sr-only">{driver(blueDrivers[i])?.name} rank</span
+            ><select
               value={rank}
               {disabled}
               onchange={(e) => (blueRanks[i] = Number(e.currentTarget.value))}
@@ -162,10 +221,25 @@
       {#each orangeRanks.slice(0, size) as rank, i}
         <div class="player">
           <span class="slot">0{i + 1}</span>
-          <img class="portrait" src={opponentPortraits[i]} alt="" />
-          <div><strong>{opponents[i]}</strong><small>Opponent</small></div>
+          <img class="portrait" src={portrait(orangeDrivers[i])} alt="" />
+          <div class="driver-info">
+            <label
+              ><span class="sr-only">Opponent {i + 1} character</span><select
+                aria-label={`Opponent ${i + 1} character`}
+                value={orangeDrivers[i]}
+                {disabled}
+                onchange={(e) => (orangeDrivers[i] = e.currentTarget.value)}
+                >{#each roster as r}<option
+                    value={r.id}
+                    disabled={usedCharacter(r.id, orangeDrivers[i])}
+                    >{r.name}</option
+                  >{/each}</select
+              ></label
+            ><small>{driver(orangeDrivers[i])?.carName}</small>
+          </div>
           <label
-            ><span class="sr-only">{opponents[i]} rank</span><select
+            ><span class="sr-only">{driver(orangeDrivers[i])?.name} rank</span
+            ><select
               value={rank}
               {disabled}
               onchange={(e) => (orangeRanks[i] = Number(e.currentTarget.value))}
@@ -186,8 +260,8 @@
         Standard Rocket League rules · No equipment or Flow · No career rewards
       </p>
       <p class="hint">
-        All bots use KilobyteReduced. Ranks are estimates; adjust them to get
-        the match you want.
+        Characters change the name, portrait and car. All bots use
+        KilobyteReduced's playstyle; ranks are estimates.
       </p>
     </div>
     <button class="launch" {disabled} onclick={launch}
@@ -325,6 +399,12 @@
   .player > label {
     width: 155px;
     flex-shrink: 0;
+  }
+  .driver-info select {
+    width: 100%;
+    padding: 8px 10px;
+    min-width: 0;
+    font-weight: 500;
   }
   .player select {
     margin: 0;

@@ -11,10 +11,40 @@ import (
 
 // Ranks describe each slot, independently; the human is always blue slot zero.
 type StoryFreeMatchOptions struct {
-	Size        int    `json:"size"`
-	Arena       string `json:"arena"`
-	BlueRanks   []int  `json:"blueRanks"`
-	OrangeRanks []int  `json:"orangeRanks"`
+	Size          int      `json:"size"`
+	Arena         string   `json:"arena"`
+	BlueRanks     []int    `json:"blueRanks"`
+	OrangeRanks   []int    `json:"orangeRanks"`
+	BlueDrivers   []string `json:"blueDrivers"`
+	OrangeDrivers []string `json:"orangeDrivers"`
+}
+
+func storyFreeMatchDrivers(o StoryFreeMatchOptions) ([][]StoryRecruit, error) {
+	ids := [][]string{o.BlueDrivers, o.OrangeDrivers}
+	defaults := [][]string{{"rookie", "pro"}, {"Beast from the East", "Phoenix CS", "Fury"}}
+	counts := []int{o.Size - 1, o.Size}
+	drivers := make([][]StoryRecruit, 2)
+	seen := map[string]bool{}
+	for team := range ids {
+		if len(ids[team]) == 0 {
+			ids[team] = defaults[team][:counts[team]]
+		}
+		if len(ids[team]) != counts[team] {
+			return nil, errors.New("Choose a character for every bot")
+		}
+		for _, id := range ids[team] {
+			driver, ok := storyRecruit(id)
+			if !ok {
+				return nil, errors.New("Unknown free-match character")
+			}
+			if seen[id] {
+				return nil, errors.New("Choose a different character for each bot")
+			}
+			seen[id] = true
+			drivers[team] = append(drivers[team], driver)
+		}
+	}
+	return drivers, nil
 }
 
 var storyFreeMatchArenas = []string{"BeckwithPark", "Farmstead", "UrbanCentral", "Mannfield", "DFHStadium", "ChampionsField"}
@@ -22,6 +52,10 @@ var storyFreeMatchArenas = []string{"BeckwithPark", "Farmstead", "UrbanCentral",
 func storyFreeMatchConfig(o StoryFreeMatchOptions, bots []BotInfo, launcher, launcherArg string) (StartMatchOptions, error) {
 	if o.Size < 1 || o.Size > 3 || len(o.BlueRanks) != o.Size-1 || len(o.OrangeRanks) != o.Size {
 		return StartMatchOptions{}, errors.New("Choose 1v1, 2v2 or 3v3 and a rank for every bot")
+	}
+	drivers, err := storyFreeMatchDrivers(o)
+	if err != nil {
+		return StartMatchOptions{}, err
 	}
 	if !slices.Contains(storyFreeMatchArenas, o.Arena) {
 		return StartMatchOptions{}, errors.New("Choose an available free-match arena")
@@ -56,10 +90,7 @@ func storyFreeMatchConfig(o StoryFreeMatchOptions, bots []BotInfo, launcher, lau
 			if err != nil {
 				return StartMatchOptions{}, err
 			}
-			name := []string{"Morgan Vale", "Casey Reed"}[min(i, 1)]
-			if team == 1 {
-				name = []string{"Rowan Hayes", "Lena Cross", "Viktor Rook"}[i]
-			}
+			name := drivers[team][i].Name
 			player, err = storyNamedPlayer(player, name)
 			if err != nil {
 				return StartMatchOptions{}, err

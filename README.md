@@ -15,7 +15,7 @@ From local games to the main stage: 24 fixtures, seven chapters, recruitment, sa
 
 ## Free match
 
-Build a 1v1, 2v2 or 3v3 and choose each teammate's and opponent's estimated rank independently. Standard Rocket League rules, without career rewards or equipment.
+Build a 1v1, 2v2 or 3v3 and choose each bot's character and estimated rank independently. Portraits and cars follow the chosen character. Standard Rocket League rules, without career rewards or equipment.
 
 ![Free match — character portraits and independent bot ranks, shown with a sample setup](docs/images/free-match.png)
 

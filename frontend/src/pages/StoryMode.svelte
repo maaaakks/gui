@@ -411,6 +411,8 @@
       {rankNames}
       {locked}
       onlaunch={refresh}
+      roster={view.roster}
+      {portraits}
     />
   {:else if tab === "season"}
     {#if !view.save.profileSet}<div class="setup-hint">
