@@ -1,5 +1,7 @@
 # RLBotGUI
 
+This branch contains an experimental Story Mode prototype. See [STORY_MODE.md](STORY_MODE.md) for setup, features, known issues and design questions.
+
 The official GUI for [RLBot](https://rlbot.org) v5. The RLBot GUI features:
 
 - Easy match launching: drag-&-drop bots and human onto teams and press start.

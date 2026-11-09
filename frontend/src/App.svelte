@@ -154,9 +154,9 @@ let paths: {
   </div>
 
   <div
-    class={"pageContainer" + (activePage == "storymode" ? "" : " hidden")}
+    class={"pageContainer" + (activePage == "storymode" ? " storyPage" : " hidden")}
   >
-    <StoryMode />
+    <StoryMode {paths} visible={activePage === "storymode"} />
   </div>
 
   <div
@@ -245,6 +245,13 @@ let paths: {
     background: inherit;
     visibility: visible;
     overflow: auto;
+  }
+  .pageContainer.storyPage {
+    display:block;
+    background:#101a28;
+    flex:1 1 0;
+    height:0;
+    min-height:0;
   }
   .hidden {
     opacity: 0;

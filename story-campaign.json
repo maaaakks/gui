@@ -1,0 +1,581 @@
+[
+  {
+    "id": "INTRO",
+    "name": "The lot",
+    "description": "A borrowed car. A fenced court. Ellis has agreed to give you four matches to prove you belong.",
+    "prereqs": [],
+    "challenges": [
+      {
+        "id": "INTRO-1",
+        "humanTeamSize": 1,
+        "opponentBots": [
+          "Kilobyte"
+        ],
+        "originalBots": [],
+        "map": "Farmstead",
+        "display": "First run",
+        "brief": "Beat the local regular. Learn the pitch before worrying about the result.",
+        "optional": false,
+        "disabledBoost": false,
+        "max_score": "",
+        "limitations": [],
+        "completionConditions": {},
+        "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
+        "rankOffset": -2,
+        "opponentBoostCap": 80,
+        "bestOf": 1
+      },
+      {
+        "id": "INTRO-2",
+        "humanTeamSize": 1,
+        "opponentBots": [
+          "Kilobyte"
+        ],
+        "originalBots": [],
+        "map": "Farmstead",
+        "display": "Stay in the game",
+        "brief": "Keep your composure for a second match. Ellis will open the workshop afterwards.",
+        "optional": false,
+        "disabledBoost": false,
+        "max_score": "",
+        "limitations": [],
+        "completionConditions": {},
+        "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
+        "rankOffset": -2,
+        "opponentBoostCap": 90,
+        "bestOf": 1
+      },
+      {
+        "id": "INTRO-3",
+        "humanTeamSize": 1,
+        "opponentBots": [
+          "Kilobyte"
+        ],
+        "originalBots": [],
+        "map": "Farmstead",
+        "display": "A familiar face",
+        "brief": "Rowan is back. This time you know what to expect.",
+        "optional": false,
+        "disabledBoost": false,
+        "max_score": "",
+        "limitations": [],
+        "completionConditions": {},
+        "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
+        "rankOffset": -2,
+        "opponentBoostCap": 100,
+        "bestOf": 1
+      },
+      {
+        "id": "INTRO-4",
+        "humanTeamSize": 1,
+        "opponentBots": [
+          "Kilobyte"
+        ],
+        "originalBots": [],
+        "map": "Farmstead_Night",
+        "display": "Last game under the lights",
+        "brief": "Win the local final and earn your place in the next tournament.",
+        "optional": false,
+        "disabledBoost": false,
+        "max_score": "",
+        "limitations": [],
+        "completionConditions": {},
+        "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
+        "rankOffset": -2,
+        "opponentBoostCap": 100,
+        "bestOf": 3
+      }
+    ]
+  },
+  {
+    "id": "TRYHARD",
+    "name": "Find your duo",
+    "description": "Morgan has the mechanics. You have the ambition. Neither of you has learned to trust the other yet.",
+    "prereqs": [
+      "INTRO"
+    ],
+    "challenges": [
+      {
+        "id": "TRYHARD-1",
+        "humanTeamSize": 2,
+        "opponentBots": [
+          "Kilobyte",
+          "Kilobyte"
+        ],
+        "originalBots": [],
+        "map": "BeckwithPark",
+        "display": "Someone to play with",
+        "brief": "Make your first appearance as a pair.",
+        "optional": false,
+        "disabledBoost": false,
+        "max_score": "",
+        "limitations": [],
+        "completionConditions": {},
+        "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
+        "rankOffset": -1,
+        "opponentBoostCap": 80,
+        "bestOf": 1
+      },
+      {
+        "id": "TRYHARD-2",
+        "humanTeamSize": 2,
+        "opponentBots": [
+          "Kilobyte",
+          "Kilobyte"
+        ],
+        "originalBots": [],
+        "map": "BeckwithPark",
+        "display": "One more option",
+        "brief": "Give Morgan a chance to receive the ball. Ellis has a new boost controller for you.",
+        "optional": false,
+        "disabledBoost": false,
+        "max_score": "",
+        "limitations": [],
+        "completionConditions": {},
+        "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
+        "rankOffset": -1,
+        "opponentBoostCap": 90,
+        "bestOf": 1
+      },
+      {
+        "id": "TRYHARD-3",
+        "humanTeamSize": 2,
+        "opponentBots": [
+          "Kilobyte",
+          "Kilobyte"
+        ],
+        "originalBots": [],
+        "map": "BeckwithPark",
+        "display": "The other side of town",
+        "brief": "An away fixture against a more settled pair.",
+        "optional": false,
+        "disabledBoost": false,
+        "max_score": "",
+        "limitations": [],
+        "completionConditions": {},
+        "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
+        "rankOffset": -1,
+        "opponentBoostCap": 100,
+        "bestOf": 1
+      },
+      {
+        "id": "TRYHARD-4",
+        "humanTeamSize": 2,
+        "opponentBots": [
+          "Kilobyte",
+          "Kilobyte"
+        ],
+        "originalBots": [],
+        "map": "BeckwithPark_Midnight",
+        "display": "Two names on the sheet",
+        "brief": "Win the doubles final. Put a real name on your club.",
+        "optional": false,
+        "disabledBoost": false,
+        "max_score": "",
+        "limitations": [],
+        "completionConditions": {},
+        "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
+        "rankOffset": -1,
+        "opponentBoostCap": 100,
+        "bestOf": 3
+      }
+    ]
+  },
+  {
+    "id": "PBOOST",
+    "name": "Beyond the neighbourhood",
+    "description": "The entry fees are real now. So are the opponents. A small sponsor is watching the qualifiers.",
+    "prereqs": [
+      "TRYHARD"
+    ],
+    "challenges": [
+      {
+        "id": "PBOOST-1",
+        "humanTeamSize": 2,
+        "opponentBots": [
+          "Kilobyte",
+          "Kilobyte"
+        ],
+        "originalBots": [],
+        "map": "UrbanCentral_Dawn",
+        "display": "Open qualifier",
+        "brief": "Win your opening qualifier.",
+        "optional": false,
+        "disabledBoost": false,
+        "max_score": "",
+        "limitations": [],
+        "completionConditions": {},
+        "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
+        "rankOffset": -1,
+        "opponentBoostCap": 80,
+        "bestOf": 1
+      },
+      {
+        "id": "PBOOST-2",
+        "humanTeamSize": 2,
+        "opponentBots": [
+          "Kilobyte",
+          "Kilobyte"
+        ],
+        "originalBots": [],
+        "map": "UrbanCentral",
+        "display": "Bad weather",
+        "brief": "Keep the game simple on a difficult away day.",
+        "optional": false,
+        "disabledBoost": false,
+        "max_score": "",
+        "limitations": [],
+        "completionConditions": {},
+        "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
+        "rankOffset": -1,
+        "opponentBoostCap": 90,
+        "bestOf": 1
+      },
+      {
+        "id": "PBOOST-3",
+        "humanTeamSize": 2,
+        "opponentBots": [
+          "Kilobyte",
+          "Kilobyte"
+        ],
+        "originalBots": [],
+        "map": "UrbanCentral",
+        "display": "A place in the bracket",
+        "brief": "Beat a team that has been here before.",
+        "optional": false,
+        "disabledBoost": false,
+        "max_score": "",
+        "limitations": [],
+        "completionConditions": {},
+        "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
+        "rankOffset": -1,
+        "opponentBoostCap": 100,
+        "bestOf": 1
+      },
+      {
+        "id": "PBOOST-4",
+        "humanTeamSize": 2,
+        "opponentBots": [
+          "Kilobyte",
+          "Kilobyte"
+        ],
+        "originalBots": [],
+        "map": "UrbanCentral_Night",
+        "display": "First colours",
+        "brief": "Win the qualifier and earn the club its first sponsor.",
+        "optional": false,
+        "disabledBoost": false,
+        "max_score": "",
+        "limitations": [],
+        "completionConditions": {},
+        "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
+        "rankOffset": -1,
+        "opponentBoostCap": 100,
+        "bestOf": 3
+      }
+    ]
+  },
+  {
+    "id": "WASTELAND",
+    "name": "A full team",
+    "description": "Casey joins the roster. Three good players are not automatically a good team.",
+    "prereqs": [
+      "PBOOST"
+    ],
+    "challenges": [
+      {
+        "id": "WASTELAND-1",
+        "humanTeamSize": 3,
+        "opponentBots": [
+          "Kilobyte",
+          "Kilobyte",
+          "Kilobyte"
+        ],
+        "originalBots": [],
+        "map": "Mannfield",
+        "display": "The third seat",
+        "brief": "Play your first match with the full roster.",
+        "optional": false,
+        "disabledBoost": false,
+        "max_score": "",
+        "limitations": [],
+        "completionConditions": {},
+        "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
+        "rankOffset": 0,
+        "opponentBoostCap": 80,
+        "bestOf": 1
+      },
+      {
+        "id": "WASTELAND-2",
+        "humanTeamSize": 3,
+        "opponentBots": [
+          "Kilobyte",
+          "Kilobyte",
+          "Kilobyte"
+        ],
+        "originalBots": [],
+        "map": "Mannfield",
+        "display": "Room for everyone",
+        "brief": "Find space without chasing every touch.",
+        "optional": false,
+        "disabledBoost": false,
+        "max_score": "",
+        "limitations": [],
+        "completionConditions": {},
+        "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
+        "rankOffset": 0,
+        "opponentBoostCap": 90,
+        "bestOf": 1
+      },
+      {
+        "id": "WASTELAND-3",
+        "humanTeamSize": 3,
+        "opponentBots": [
+          "Kilobyte",
+          "Kilobyte",
+          "Kilobyte"
+        ],
+        "originalBots": [],
+        "map": "Mannfield_Night",
+        "display": "Old habits",
+        "brief": "Rowan has a new team. You will have to beat all three of them.",
+        "optional": false,
+        "disabledBoost": false,
+        "max_score": "",
+        "limitations": [],
+        "completionConditions": {},
+        "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
+        "rankOffset": 0,
+        "opponentBoostCap": 100,
+        "bestOf": 1
+      },
+      {
+        "id": "WASTELAND-4",
+        "humanTeamSize": 3,
+        "opponentBots": [
+          "Kilobyte",
+          "Kilobyte",
+          "Kilobyte"
+        ],
+        "originalBots": [],
+        "map": "Mannfield_Night",
+        "display": "On the same page",
+        "brief": "Win the regional final as a team.",
+        "optional": false,
+        "disabledBoost": false,
+        "max_score": "",
+        "limitations": [],
+        "completionConditions": {},
+        "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
+        "rankOffset": 0,
+        "opponentBoostCap": 100,
+        "bestOf": 3
+      }
+    ]
+  },
+  {
+    "id": "CAMPANDSNIPE",
+    "name": "The bubble",
+    "description": "Every name in this bracket wants the same invitation. You are close enough to see the stage, not close enough to relax.",
+    "prereqs": [
+      "WASTELAND"
+    ],
+    "challenges": [
+      {
+        "id": "CAMPANDSNIPE-1",
+        "humanTeamSize": 3,
+        "opponentBots": [
+          "Kilobyte",
+          "Kilobyte",
+          "Kilobyte"
+        ],
+        "originalBots": [],
+        "map": "DFHStadium_Day",
+        "display": "The long weekend",
+        "brief": "Win the first qualifying round.",
+        "optional": false,
+        "disabledBoost": false,
+        "max_score": "",
+        "limitations": [],
+        "completionConditions": {},
+        "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
+        "rankOffset": 1,
+        "opponentBoostCap": 80,
+        "bestOf": 1
+      },
+      {
+        "id": "CAMPANDSNIPE-2",
+        "humanTeamSize": 3,
+        "opponentBots": [
+          "Kilobyte",
+          "Kilobyte",
+          "Kilobyte"
+        ],
+        "originalBots": [],
+        "map": "DFHStadium_Day",
+        "display": "No easy fixtures",
+        "brief": "Face an opponent above your reference level.",
+        "optional": false,
+        "disabledBoost": false,
+        "max_score": "",
+        "limitations": [],
+        "completionConditions": {},
+        "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
+        "rankOffset": 1,
+        "opponentBoostCap": 90,
+        "bestOf": 1
+      },
+      {
+        "id": "CAMPANDSNIPE-3",
+        "humanTeamSize": 3,
+        "opponentBots": [
+          "Kilobyte",
+          "Kilobyte",
+          "Kilobyte"
+        ],
+        "originalBots": [],
+        "map": "DFHStadium",
+        "display": "One series away",
+        "brief": "Reach the last qualifying round.",
+        "optional": false,
+        "disabledBoost": false,
+        "max_score": "",
+        "limitations": [],
+        "completionConditions": {},
+        "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
+        "rankOffset": 1,
+        "opponentBoostCap": 100,
+        "bestOf": 1
+      },
+      {
+        "id": "CAMPANDSNIPE-4",
+        "humanTeamSize": 3,
+        "opponentBots": [
+          "Kilobyte",
+          "Kilobyte",
+          "Kilobyte"
+        ],
+        "originalBots": [],
+        "map": "DFHStadium",
+        "display": "An invitation",
+        "brief": "Win your place on the main stage.",
+        "optional": false,
+        "disabledBoost": false,
+        "max_score": "",
+        "limitations": [],
+        "completionConditions": {},
+        "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
+        "rankOffset": 1,
+        "opponentBoostCap": 100,
+        "bestOf": 3
+      }
+    ]
+  },
+  {
+    "id": "CHAMPIONSIAN",
+    "name": "The main stage",
+    "description": "The crowd is louder than the workshop ever was. The job is still the same: play the next ball.",
+    "prereqs": [
+      "CAMPANDSNIPE"
+    ],
+    "challenges": [
+      {
+        "id": "CHAMPIONSIAN-1",
+        "humanTeamSize": 3,
+        "opponentBots": [
+          "Kilobyte",
+          "Kilobyte",
+          "Kilobyte"
+        ],
+        "originalBots": [],
+        "map": "ChampionsField_Day",
+        "display": "Arrival",
+        "brief": "Win your opening match on the main stage.",
+        "optional": false,
+        "disabledBoost": false,
+        "max_score": "",
+        "limitations": [],
+        "completionConditions": {},
+        "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
+        "rankOffset": 2,
+        "opponentBoostCap": 80,
+        "bestOf": 1
+      },
+      {
+        "id": "CHAMPIONSIAN-2",
+        "humanTeamSize": 3,
+        "opponentBots": [
+          "Kilobyte",
+          "Kilobyte",
+          "Kilobyte"
+        ],
+        "originalBots": [],
+        "map": "ChampionsField_Day",
+        "display": "Into the bracket",
+        "brief": "Earn a place in the final rounds.",
+        "optional": false,
+        "disabledBoost": false,
+        "max_score": "",
+        "limitations": [],
+        "completionConditions": {},
+        "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
+        "rankOffset": 2,
+        "opponentBoostCap": 90,
+        "bestOf": 1
+      },
+      {
+        "id": "CHAMPIONSIAN-3",
+        "humanTeamSize": 3,
+        "opponentBots": [
+          "Kilobyte",
+          "Kilobyte",
+          "Kilobyte"
+        ],
+        "originalBots": [],
+        "map": "ChampionsField",
+        "display": "The return fixture",
+        "brief": "Settle the season-long rivalry with Rowan.",
+        "optional": false,
+        "disabledBoost": false,
+        "max_score": "",
+        "limitations": [],
+        "completionConditions": {},
+        "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
+        "rankOffset": 2,
+        "opponentBoostCap": 100,
+        "bestOf": 1
+      },
+      {
+        "id": "CHAMPIONSIAN-4",
+        "humanTeamSize": 3,
+        "opponentBots": [
+          "Kilobyte",
+          "Kilobyte",
+          "Kilobyte"
+        ],
+        "originalBots": [],
+        "map": "ChampionsField",
+        "display": "The final",
+        "brief": "One match to finish the season. Bring it home.",
+        "optional": false,
+        "disabledBoost": false,
+        "max_score": "",
+        "limitations": [],
+        "completionConditions": {},
+        "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
+        "rankOffset": 2,
+        "opponentBoostCap": 100,
+        "bestOf": 5
+      }
+    ]
+  },
+  {
+    "id": "SUMMIT",
+    "name": "At the top",
+    "description": "Back at the workshop. Same court, different story. The trophy belongs here, with the people who helped you earn it. Your season is complete; every fixture remains available for a return match.",
+    "prereqs": [
+      "CHAMPIONSIAN"
+    ],
+    "challenges": []
+  }
+]

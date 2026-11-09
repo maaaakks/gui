@@ -25,11 +25,15 @@ type RawReleaseInfo struct {
 
 // App struct
 type App struct {
-	app               *application.App
-	latestReleaseJson []RawReleaseInfo
-	rlbotAddress      string
-	sandbox           *SandboxState
-	sandboxMu         sync.Mutex
+	storyMu            sync.Mutex
+	storyStatus        StoryStatus
+	storySavePath      string
+	storyFlowRequested bool
+	app                *application.App
+	latestReleaseJson  []RawReleaseInfo
+	rlbotAddress       string
+	sandbox            *SandboxState
+	sandboxMu          sync.Mutex
 }
 
 func (a *App) IgnoreMe(
