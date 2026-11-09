@@ -14,6 +14,7 @@ The regular RLBot navigation, Play page, application title and startup page are 
 - BO3 chapter finals and a BO5 final, with series progress saved between games.
 - An optional three-goal-lead finish, enabled by default. This applies to each game of a series, in either team's favour, and still checks any additional objectives.
 - Named recruits, portraits, short biographies, recruitment costs and saved teammate selection for doubles and standard.
+- A stable car body per recruit and rival, drawn from a curated Octane-hitbox catalogue. Recruitment cards show each driver's car; [STORY_CARS.md](STORY_CARS.md) lists the assignments and source.
 - Club naming, a roster, match history, credits and saved campaign progression.
 - Distinct completed, last-failed and unplayed fixture indicators.
 - A workshop with unlocks, equipment slots and three upgrade tiers.

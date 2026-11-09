@@ -222,7 +222,7 @@ func (a *App) GetStory() (StoryView, error) {
 		return StoryView{}, err
 	}
 	cities := storyCitiesForSave(save)
-	return StoryView{Roster: storyRoster, Modules: storyModules, Slots: storySlots(save), Wins: storyWins(save), MaxTier: storyMaxTier(save), Cities: cities, Save: save, Unlocked: unlockedStoryCities(save, cities), Status: a.storyStatus, AvailableBots: []string{}}, nil
+	return StoryView{Roster: storyRecruitmentRoster(), Modules: storyModules, Slots: storySlots(save), Wins: storyWins(save), MaxTier: storyMaxTier(save), Cities: cities, Save: save, Unlocked: unlockedStoryCities(save, cities), Status: a.storyStatus, AvailableBots: []string{}}, nil
 }
 func (a *App) RenameStoryClub(name string) error {
 	a.storyMu.Lock()

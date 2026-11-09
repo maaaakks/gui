@@ -11,6 +11,7 @@ type StoryRecruit struct {
 	ID       string `json:"id"`
 	Name     string `json:"name"`
 	Portrait string `json:"portrait"`
+	CarName  string `json:"carName"`
 	Bio      string `json:"bio"`
 	BotName  string `json:"botName"`
 	Adaptive bool   `json:"adaptive"`
@@ -46,6 +47,7 @@ func storyNamedPlayer(p PlayerJs, name string) (PlayerJs, error) {
 			return PlayerJs{}, err
 		}
 		bot.Config.Settings.Name = name
+		bot.Loadout = storyDriverLoadout(bot.Loadout, name)
 		data, err := json.Marshal(bot)
 		p.Player = data
 		return p, err
@@ -56,6 +58,7 @@ func storyNamedPlayer(p PlayerJs, name string) (PlayerJs, error) {
 			return PlayerJs{}, err
 		}
 		bot.Name = name
+		bot.Loadout = storyDriverLoadout(bot.Loadout, name)
 		data, err := json.Marshal(bot)
 		p.Player = data
 		return p, err

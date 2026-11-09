@@ -647,6 +647,7 @@
               <h3>{recruit.name}</h3>
               <p>{recruit.bio}</p>
               <p class="recruit-level">{recruitLevel(recruit)}</p>
+              <p class="recruit-level">{recruit.carName} · Octane hitbox</p>
               <details>
                 <summary>Bot details</summary>
                 <p>
