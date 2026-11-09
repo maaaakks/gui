@@ -580,33 +580,36 @@
           <details class="match-details">
             <summary>Match details</summary>
             <p>{challenge.brief}</p>
-            <p>
-              Arena: {arenaNames[challenge.map] ?? challenge.map}.<br />{bestOf(
-                challenge,
-              ) > 1
-                ? `Best of ${bestOf(challenge)}`
-                : "Single game"} · Standard demolitions.
-            </p>
-            <p>
-              Opposition: {challenge.opponentNames.join(", ")}.<br />Kilobyte ·
-              Estimated {rankNames[challenge.enemyRank]}. {view.save.vanilla
-                ? "Standard opponent boost."
-                : `Opponent boost capped at ${challenge.opponentBoostCap}.`}
-            </p>
-            <p>
-              Your line-up: You{challenge.humanTeamSize > 1
-                ? ` + ${challenge.humanTeamSize - 1} teammate${challenge.humanTeamSize === 3 ? "s" : ""}`
-                : ""}.
-            </p>
-            <p>
-              {view.save.vanilla
-                ? "Vanilla boost rules. Equipment, Flow State and opponent boost handicaps are disabled."
-                : "100 boost at the start of each game. Normal propulsion. Equipment affects your car only."}
-            </p>
-            <p>
-              Normal match time still applies. Other objectives must be met to
-              earn a win.
-            </p>
+            <dl class="fixture-details">
+              <dt>Arena</dt>
+              <dd>{arenaNames[challenge.map] ?? challenge.map}</dd>
+              <dt>Format</dt>
+              <dd>
+                {challenge.humanTeamSize}v{challenge.opponentBots.length} · {bestOf(
+                  challenge,
+                ) > 1
+                  ? `BO${bestOf(challenge)}`
+                  : "Single game"}
+              </dd>
+              <dt>Opponents</dt>
+              <dd>{challenge.opponentNames.join(", ")}</dd>
+              <dt>Your team</dt>
+              <dd>
+                {["You", ...selectedLineup().filter(Boolean).map(label)].join(
+                  ", ",
+                )}
+              </dd>
+              {#if view.save.vanilla}
+                <dt>Rules</dt>
+                <dd>Vanilla · equipment off</dd>
+              {:else if challenge.opponentBoostCap > 0 && challenge.opponentBoostCap < 100}
+                <dt>Handicap</dt>
+                <dd>
+                  Opponent boost capacity −{100 - challenge.opponentBoostCap}% ({challenge.opponentBoostCap}
+                  max)
+                </dd>
+              {/if}
+            </dl>
           </details>
         </article>
       {/if}
@@ -1382,6 +1385,21 @@
   .match-details p {
     font-size: 12px;
     margin-top: 12px;
+  }
+  .fixture-details {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 10px 14px;
+    margin: 16px 0 0;
+    line-height: 1.5;
+  }
+  .fixture-details dt {
+    color: #9aabc2;
+  }
+  .fixture-details dd {
+    margin: 0;
+    color: var(--text);
+    overflow-wrap: anywhere;
   }
   .teammate {
     margin-bottom: 5px;

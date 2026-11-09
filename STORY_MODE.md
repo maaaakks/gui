@@ -20,6 +20,23 @@ The regular RLBot navigation, Play page, application title and startup page are 
 - A workshop with unlocks, equipment slots and three upgrade tiers.
 - A Vanilla switch that suspends equipment, Flow, the initial boost override and opponent boost caps while retaining career progress and purchases. Career rules, including the separately configured three-goal-lead option, still apply.
 
+## Difficulty progression
+
+Opponent tank limits increase across the campaign rather than restarting at 80 every chapter. These limit capacity, not boost thrust, speed or regeneration. Teammates stay at the player's playlist reference level with normal boost; the player's equipment is separate.
+
+| Chapter | Rank offset from playlist reference | Opponent tank over the four fixtures |
+| --- | --- | --- |
+| The lot | −2 divisions | 70 → 75 → 80 → 80 |
+| Find your duo | −1 division | 85 → 85 → 90 → 90 |
+| Beyond the neighbourhood | −1 division, then reference level for the final | 95 → 95 → 100 → 100 |
+| A full team | Reference level | 100 throughout |
+| The bubble | +1 division | 100 throughout |
+| The main stage | +2 divisions | 100 throughout |
+
+Offsets are clamped to Bronze I–SSL and remain estimated bot difficulty labels, not measured MMR. The goal is a gentle early advantage followed by standard-fuel competition. These values are a first balancing pass, not validated win-rate targets. Vanilla disables the tank handicaps. Existing wins, credits and series scores are retained; revised settings apply when starting the next game.
+
+Match details show the actual team names and only show a fuel handicap when it is active. Normal 100-capacity opponents are not presented as nerfed.
+
 ## Equipment and Flow: experimental
 
 These systems are unfinished and need both gameplay testing and design discussion. Their presence is not a recommendation that the official v5 mode should use upgrades.

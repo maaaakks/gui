@@ -22,7 +22,7 @@
         "completionConditions": {},
         "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
         "rankOffset": -2,
-        "opponentBoostCap": 80,
+        "opponentBoostCap": 70,
         "bestOf": 1
       },
       {
@@ -42,7 +42,7 @@
         "completionConditions": {},
         "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
         "rankOffset": -2,
-        "opponentBoostCap": 90,
+        "opponentBoostCap": 75,
         "bestOf": 1
       },
       {
@@ -62,7 +62,7 @@
         "completionConditions": {},
         "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
         "rankOffset": -2,
-        "opponentBoostCap": 100,
+        "opponentBoostCap": 80,
         "bestOf": 1
       },
       {
@@ -82,7 +82,7 @@
         "completionConditions": {},
         "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
         "rankOffset": -2,
-        "opponentBoostCap": 100,
+        "opponentBoostCap": 80,
         "bestOf": 3
       }
     ]
@@ -113,7 +113,7 @@
         "completionConditions": {},
         "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
         "rankOffset": -1,
-        "opponentBoostCap": 80,
+        "opponentBoostCap": 85,
         "bestOf": 1
       },
       {
@@ -134,7 +134,7 @@
         "completionConditions": {},
         "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
         "rankOffset": -1,
-        "opponentBoostCap": 90,
+        "opponentBoostCap": 85,
         "bestOf": 1
       },
       {
@@ -155,7 +155,7 @@
         "completionConditions": {},
         "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
         "rankOffset": -1,
-        "opponentBoostCap": 100,
+        "opponentBoostCap": 90,
         "bestOf": 1
       },
       {
@@ -176,7 +176,7 @@
         "completionConditions": {},
         "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
         "rankOffset": -1,
-        "opponentBoostCap": 100,
+        "opponentBoostCap": 90,
         "bestOf": 3
       }
     ]
@@ -207,7 +207,7 @@
         "completionConditions": {},
         "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
         "rankOffset": -1,
-        "opponentBoostCap": 80,
+        "opponentBoostCap": 95,
         "bestOf": 1
       },
       {
@@ -228,7 +228,7 @@
         "completionConditions": {},
         "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
         "rankOffset": -1,
-        "opponentBoostCap": 90,
+        "opponentBoostCap": 95,
         "bestOf": 1
       },
       {
@@ -269,7 +269,7 @@
         "limitations": [],
         "completionConditions": {},
         "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
-        "rankOffset": -1,
+        "rankOffset": 0,
         "opponentBoostCap": 100,
         "bestOf": 3
       }
@@ -302,7 +302,7 @@
         "completionConditions": {},
         "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
         "rankOffset": 0,
-        "opponentBoostCap": 80,
+        "opponentBoostCap": 100,
         "bestOf": 1
       },
       {
@@ -324,7 +324,7 @@
         "completionConditions": {},
         "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
         "rankOffset": 0,
-        "opponentBoostCap": 90,
+        "opponentBoostCap": 100,
         "bestOf": 1
       },
       {
@@ -400,7 +400,7 @@
         "completionConditions": {},
         "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
         "rankOffset": 1,
-        "opponentBoostCap": 80,
+        "opponentBoostCap": 100,
         "bestOf": 1
       },
       {
@@ -422,7 +422,7 @@
         "completionConditions": {},
         "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
         "rankOffset": 1,
-        "opponentBoostCap": 90,
+        "opponentBoostCap": 100,
         "bestOf": 1
       },
       {
@@ -498,7 +498,7 @@
         "completionConditions": {},
         "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
         "rankOffset": 2,
-        "opponentBoostCap": 80,
+        "opponentBoostCap": 100,
         "bestOf": 1
       },
       {
@@ -520,7 +520,7 @@
         "completionConditions": {},
         "adaptation": "Season campaign. Kilobyte difficulty is relative to your rank in this playlist.",
         "rankOffset": 2,
-        "opponentBoostCap": 90,
+        "opponentBoostCap": 100,
         "bestOf": 1
       },
       {
