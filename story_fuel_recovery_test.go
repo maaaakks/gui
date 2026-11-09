@@ -1,6 +1,72 @@
 package main
 
-import "testing"
+import (
+	"github.com/RLBot/go-interface/flat"
+	"testing"
+)
+
+func TestReserveAcknowledgesWhileGaugeKeepsFalling(t *testing.T) {
+	s := newStorySave()
+	s.Modules["reserve"] = 1
+	s.Equipped = []string{"reserve"}
+	r := newStoryRuntime(s, StoryChallenge{})
+	p := runtimePacket(0, 100)
+	p.Players[0].LastInput = &flat.ControllerStateT{Boost: true}
+	r.step(p, 0, false)
+	p = runtimePacket(.06, 98)
+	p.Players[0].LastInput = &flat.ControllerStateT{Boost: true}
+	r.step(p, 0, false)
+	// The transfer arrived, then another 3 boost was spent before the packet.
+	// 97 is below both 98 and 100; the older rise-only check waits for timeout.
+	p = runtimePacket(.15, 97)
+	p.Players[0].LastInput = &flat.ControllerStateT{Boost: true}
+	r.step(p, 0, false)
+	if r.Extra != 23 || r.reserveFault {
+		t.Fatal("Held boost hid a successful transfer", r.Extra, r.reserveFault)
+	}
+}
+
+func TestReserveRetriesBeforeQuarterSecond(t *testing.T) {
+	s := newStorySave()
+	s.Modules["reserve"] = 1
+	s.Equipped = []string{"reserve"}
+	r := newStoryRuntime(s, StoryChallenge{})
+	r.step(runtimePacket(0, 100), 0, false)
+	r.step(runtimePacket(.01, 98), 0, false)
+	r.step(runtimePacket(.15, 98), 0, false)
+	state := r.step(runtimePacket(.22, 98), 0, false)
+	if state == nil || state.CarStates[0].BoostAmount == nil || r.Extra != 25 {
+		t.Fatal("Reserve recovery still stalls after an ignored packet")
+	}
+}
+
+func TestReserveFuelBudgetWithDelayedApplication(t *testing.T) {
+	for _, delay := range []int{1, 2, 3} {
+		s := newStorySave()
+		s.Modules["reserve"] = 1
+		s.Equipped = []string{"reserve"}
+		r := newStoryRuntime(s, StoryChallenge{})
+		r.step(runtimePacket(0, 100), 0, false)
+		boost := float32(100)
+		queue := map[int]float32{}
+		for i := 1; i <= 240; i++ {
+			if value, ok := queue[i]; ok {
+				boost = value
+				delete(queue, i)
+			}
+			boost = max(float32(0), boost-100.0/3.0/120)
+			p := runtimePacket(float32(i)/120, boost)
+			p.Players[0].LastInput = &flat.ControllerStateT{Boost: true}
+			state := r.step(p, 0, false)
+			if state != nil && state.CarStates[0].BoostAmount != nil {
+				queue[i+delay] = state.CarStates[0].BoostAmount.Val
+			}
+		}
+		if r.Extra > 0.1 || boost < 57 || boost > 60 {
+			t.Fatal("Latency created fuel or stranded reserve", delay, boost, r.Extra)
+		}
+	}
+}
 
 func TestFullReserveAtMatchStart(t *testing.T) {
 	s := newStorySave()

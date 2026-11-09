@@ -9,6 +9,12 @@ import (
 )
 
 type storyFuelGain struct{ at, amount float32 }
+
+const (
+	storyReserveAckTimeout float32 = 0.12
+	storyReserveRetryDelay float32 = 0.20
+)
+
 type storyTouchEvent struct {
 	index int
 	at    float32
@@ -33,6 +39,8 @@ type StoryRuntime struct {
 	Extra                                      float32
 	pendingAmount, pendingTarget, pendingSince float32
 	pendingLowest                              float32
+	pendingSpent                               float32
+	wasBoosting                                bool
 	reserveFault                               bool
 	Charge                                     float32
 	Uses                                       int
@@ -175,11 +183,42 @@ func (r *StoryRuntime) pads(p *flat.GamePacketT, human int) {
 		}
 	}
 }
+
+// A native pad pickup can raise boost independently of a pending transfer.
+// Do not charge that native pickup as extra reserve delivery.
+func (r *StoryRuntime) humanPickedPad(p *flat.GamePacketT, human int) bool {
+	if r.field == nil || p.Players[human].Physics == nil {
+		return false
+	}
+	for i, pad := range p.BoostPads {
+		if i >= len(r.lastPads) || i >= len(r.field.BoostPads) || !r.lastPads[i] || pad.IsActive {
+			continue
+		}
+		loc := r.field.BoostPads[i].Location
+		distance := storyDistance2(p.Players[human].Physics.Location, loc)
+		if distance > 400*400 {
+			continue
+		}
+		nearest := true
+		for j, other := range p.Players {
+			if j != human && other.Physics != nil && storyDistance2(other.Physics.Location, loc) <= distance+100*100 {
+				nearest = false
+			}
+		}
+		if nearest {
+			return true
+		}
+	}
+	return false
+}
 func (r *StoryRuntime) step(p *flat.GamePacketT, human int, trigger bool) *flat.DesiredGameStateT {
 	if p.MatchInfo == nil || human < 0 || human >= len(p.Players) {
 		return nil
 	}
 	car := p.Players[human]
+	boosting := car.LastInput != nil && car.LastInput.Boost
+	wasBoosting := r.wasBoosting
+	r.wasBoosting = boosting
 	phase := p.MatchInfo.MatchPhase
 	active := phase == flat.MatchPhaseActive
 	dt := p.MatchInfo.SecondsElapsed - r.lastSeconds
@@ -215,6 +254,12 @@ func (r *StoryRuntime) step(p *flat.GamePacketT, human int, trigger bool) *flat.
 		r.initialFuelDone = active || car.Boost >= 99
 	}
 	if r.pendingAmount > 0 {
+		// The refill can have arrived even if the native gauge never rises:
+		// holding normal boost consumes 100/3 units per active second.
+		// Account only for intervals bracketed by reported held inputs.
+		if active && wasBoosting && boosting {
+			r.pendingSpent += (100.0 / 3.0) * dt
+		}
 		// A fixed ten-point tolerance acknowledges tiny top-ups before they
 		// are applied. Scale it to the amount actually transferred instead.
 		tolerance := min(float32(0.75), r.pendingAmount*0.75)
@@ -222,10 +267,19 @@ func (r *StoryRuntime) step(p *flat.GamePacketT, human int, trigger bool) *flat.
 		// target. A rise from the lowest observed native level also proves
 		// that the pending top-up arrived; do not require a near-100 sample.
 		rose := car.Boost > r.pendingLowest+min(float32(0.1), r.pendingAmount/4)
-		if car.Boost >= r.pendingTarget-tolerance || rose {
-			r.Extra = max(float32(0), r.Extra-r.pendingAmount)
+		if car.Boost+r.pendingSpent >= r.pendingTarget-tolerance || rose {
+			debit := r.pendingAmount
+			if r.pendingSpent > 0 && !r.humanPickedPad(p, human) {
+				// An absolute target applied later can deliver more than the
+				// original deficit. Account for it so latency creates no fuel.
+				debit = max(debit, car.Boost+r.pendingSpent-(r.pendingTarget-r.pendingAmount))
+			}
+			if debit > r.Extra {
+				target = max(float32(0), target-(debit-r.Extra))
+			}
+			r.Extra = max(float32(0), r.Extra-debit)
 			r.pendingAmount = 0
-		} else if r.activeTime-r.pendingSince > 0.5 {
+		} else if r.activeTime-r.pendingSince > storyReserveAckTimeout {
 			r.pendingAmount = 0
 			r.reserveFault = true
 			r.LastEvent = "Auxiliary transfer delayed; retrying"
@@ -303,14 +357,15 @@ func (r *StoryRuntime) step(p *flat.GamePacketT, human int, trigger bool) *flat.
 	// Never refill during a pause, demolition or an Overdrive activation.
 	// Retry a missed transfer after a bounded delay.
 	// Keep this bounded by the native deficit and the remaining reserve.
-	if active && r.reserveFault && target <= 99 && r.activeTime-r.pendingSince >= 1 {
+	if active && r.reserveFault && target <= 99.5 && r.activeTime-r.pendingSince >= storyReserveRetryDelay {
 		r.reserveFault = false
 	}
-	if active && car.DemolishedTimeout <= 0 && target <= 99 && r.Extra > 0 && r.pendingAmount == 0 && !r.reserveFault && r.OverdriveUntil == 0 {
+	if active && car.DemolishedTimeout <= 0 && target <= 99.5 && r.Extra > 0 && r.pendingAmount == 0 && !r.reserveFault && r.OverdriveUntil == 0 {
 		amount := min(r.Extra, 100-target)
 		r.pendingAmount = amount
 		r.pendingTarget = target + amount
 		r.pendingLowest = car.Boost
+		r.pendingSpent = 0
 		r.pendingSince = r.activeTime
 		target += amount
 	}

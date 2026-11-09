@@ -42,10 +42,14 @@ func TestReserveTransferDoesNotCreateFuelWhenIgnored(t *testing.T) {
 	r.step(runtimePacket(0, 100), 0, false)
 	r.Extra = 25
 	r.step(runtimePacket(.1, 98), 0, false)
+	retries := 0
 	for _, sec := range []float32{.2, .3, .4, .5, .6, .7} {
-		r.step(runtimePacket(sec, 98), 0, false)
+		state := r.step(runtimePacket(sec, 98), 0, false)
+		if state != nil && state.CarStates[0].BoostAmount != nil {
+			retries++
+		}
 	}
-	if !r.reserveFault || r.Extra != 25 || r.pendingAmount != 0 {
-		t.Fatal("Ignored transfer should pause safely without losing or duplicating reserve")
+	if r.Extra != 25 || retries < 1 || retries > 3 {
+		t.Fatal("Ignored transfer should retry at a bounded rate without consuming reserve", r.Extra, retries)
 	}
 }
