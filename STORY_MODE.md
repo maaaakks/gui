@@ -26,6 +26,8 @@ Open the **Free match** tab to play a standard 1v1, 2v2 or 3v3 with a separate B
 
 The last setup is saved locally in the GUI. Free matches do not require recruited characters, grant credits, change campaign/series progress, apply fuel handicaps, run equipment/Flow or use the career's three-goal-lead rule. They follow normal Soccar rules.
 
+Free-match slots use existing club characters with matching portraits and cars. The launch button sits in a high-contrast action bar; global GUI blur styling does not override it. The README screenshot shows the real component with a sample setup and a mocked launch API, not a recorded live match.
+
 Each Kilobyte driver gets a separate agent reservation and process, so one process cannot claim multiple differently ranked slots. This uses Byte's support for the server-assigned `RLBOT_AGENT_ID`; installed bot TOMLs are unchanged. The same reservation isolation also applies to named career drivers.
 
 ## Difficulty progression

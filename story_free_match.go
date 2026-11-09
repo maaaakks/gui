@@ -58,7 +58,7 @@ func storyFreeMatchConfig(o StoryFreeMatchOptions, bots []BotInfo, launcher, lau
 			}
 			name := []string{"Morgan Vale", "Casey Reed"}[min(i, 1)]
 			if team == 1 {
-				name = storyRivals[i]
+				name = []string{"Rowan Hayes", "Lena Cross", "Viktor Rook"}[i]
 			}
 			player, err = storyNamedPlayer(player, name)
 			if err != nil {

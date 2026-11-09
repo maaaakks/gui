@@ -1,6 +1,11 @@
 <script lang="ts">
   import { onMount, untrack } from "svelte";
   import { App } from "../../bindings/gui";
+  import morgan from "../assets/story/recruits/morgan-v2.png";
+  import casey from "../assets/story/recruits/casey-v2.png";
+  import rowan from "../assets/story/recruits/rowan-v2.png";
+  import lena from "../assets/story/recruits/lena-v2.png";
+  import viktor from "../assets/story/recruits/viktor.png";
 
   let {
     paths,
@@ -25,7 +30,9 @@
     ["ChampionsField", "Champions Field"],
   ];
   const teammates = ["Morgan Vale", "Casey Reed"];
-  const opponents = ["Logan Price", "Jules Mercer", "Finn Archer"];
+  const opponents = ["Rowan Hayes", "Lena Cross", "Viktor Rook"];
+  const teammatePortraits = [morgan, casey];
+  const opponentPortraits = [rowan, lena, viktor];
   const initialRank = untrack(() => {
     const rank = ranks["2v2"];
     return rank >= 1 && rank <= 22 ? rank : 7;
@@ -109,14 +116,14 @@
   </header>
   <div class="setup">
     <label
-      >Format<select bind:value={size} {disabled}>
+      >Format<select aria-label="Format" bind:value={size} {disabled}>
         <option value={1}>1v1 · Duel</option><option value={2}
           >2v2 · Doubles</option
         ><option value={3}>3v3 · Standard</option>
       </select></label
     >
     <label
-      >Arena<select bind:value={arena} {disabled}>
+      >Arena<select aria-label="Arena" bind:value={arena} {disabled}>
         {#each arenas as [id, name]}<option value={id}>{name}</option>{/each}
       </select></label
     >
@@ -134,6 +141,7 @@
       {#each blueRanks.slice(0, size - 1) as rank, i}
         <div class="player">
           <span class="slot">0{i + 2}</span>
+          <img class="portrait" src={teammatePortraits[i]} alt="" />
           <div><strong>{teammates[i]}</strong><small>Teammate</small></div>
           <label
             ><span class="sr-only">{teammates[i]} rank</span><select
@@ -154,6 +162,7 @@
       {#each orangeRanks.slice(0, size) as rank, i}
         <div class="player">
           <span class="slot">0{i + 1}</span>
+          <img class="portrait" src={opponentPortraits[i]} alt="" />
           <div><strong>{opponents[i]}</strong><small>Opponent</small></div>
           <label
             ><span class="sr-only">{opponents[i]} rank</span><select
@@ -170,21 +179,25 @@
       {/each}
     </section>
   </div>
-  <p class="rules">
-    Standard Rocket League rules · No equipment or Flow · No career rewards
-  </p>
-  <p class="hint">
-    All bots use KilobyteReduced. Ranks are estimates; adjust them to get the
-    match you want.
-  </p>
   {#if error}<p class="error" role="alert">{error}</p>{/if}
-  <button class="launch" {disabled} onclick={launch}
-    >{launching
-      ? "Preparing…"
-      : locked
-        ? "Match in progress"
-        : "Play free match"}</button
-  >
+  <div class="launch-bar">
+    <div>
+      <p class="rules">
+        Standard Rocket League rules · No equipment or Flow · No career rewards
+      </p>
+      <p class="hint">
+        All bots use KilobyteReduced. Ranks are estimates; adjust them to get
+        the match you want.
+      </p>
+    </div>
+    <button class="launch" {disabled} onclick={launch}
+      >{launching
+        ? "Preparing…"
+        : locked
+          ? "Match in progress"
+          : "Play free match"}</button
+    >
+  </div>
 </section>
 
 <style>
@@ -286,6 +299,14 @@
     font-size: 12px;
     color: var(--muted);
   }
+  .portrait {
+    width: 48px;
+    height: 56px;
+    object-fit: cover;
+    object-position: center top;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
   .player > div {
     flex: 1;
     min-width: 0;
@@ -327,13 +348,13 @@
   .rules {
     font-size: 13px;
     color: var(--text);
-    margin: 24px 0 8px;
+    margin: 0 0 8px;
   }
   .hint {
     font-size: 12px;
     color: var(--muted);
     line-height: 1.6;
-    margin: 0 0 22px;
+    margin: 0;
   }
   .error {
     background: #532c37;
@@ -341,9 +362,29 @@
     padding: 12px 16px;
     font-size: 13px;
   }
-  .launch {
+  .launch-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    margin-top: 24px;
+    padding: 20px;
+    background: #0b1c33;
+    border: 1px solid #ffffff20;
+    border-radius: 5px;
+  }
+  .free-match button.launch {
     background: #f89508;
+    background-color: #f89508;
     color: #102037;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none;
+    isolation: auto;
+    flex-shrink: 0;
     border: 0;
     border-radius: 4px;
     font-size: 18px;
@@ -351,8 +392,12 @@
     padding: 14px 28px;
     cursor: pointer;
   }
-  .launch:hover:not(:disabled) {
+  .free-match button.launch:hover:not(:disabled) {
     background: #ffab28;
+  }
+  .free-match button.launch:focus-visible {
+    outline: 3px solid #8bc9ff;
+    outline-offset: 3px;
   }
   :disabled {
     opacity: 0.55;
@@ -367,6 +412,12 @@
     }
   }
   @media (max-width: 600px) {
+    .launch-bar {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 16px;
+      padding: 16px;
+    }
     .free-match {
       padding: 22px 20px;
     }

@@ -1,6 +1,37 @@
 # RLBotGUI
 
-This branch contains an experimental Story Mode prototype. See [STORY_MODE.md](STORY_MODE.md) for setup, features, known issues and design questions.
+This branch explores a playable career and custom free matches for RLBot v5. The original RLBot menus are kept intact; the Story Mode systems are experimental.
+
+## Story Mode
+
+From local games to the main stage: 24 fixtures, seven chapters, recruitment, saved line-ups, changing arenas and BO3/BO5 finals.
+
+<p align="center">
+  <img src="frontend/src/assets/story/the-lot.png" width="48%" alt="The lot: a borrowed car on a neighbourhood pitch" />
+  <img src="frontend/src/assets/story/the-main-stage.png" width="48%" alt="The main stage: the campaign reaches a larger arena" />
+</p>
+
+*Temporary campaign concept artwork.*
+
+## Free match
+
+Build a 1v1, 2v2 or 3v3 and choose each teammate's and opponent's estimated rank independently. Standard Rocket League rules, without career rewards or equipment.
+
+![Free match — character portraits and independent bot ranks, shown with a sample setup](docs/images/free-match.png)
+
+## Meet the club
+
+Named drivers keep their portraits and assigned cars across matches. Their personalities are currently visual and narrative; they do not imply independently trained bot behavior.
+
+<p align="center">
+  <img src="frontend/src/assets/story/recruits/morgan-v2.png" width="30%" alt="Morgan Vale, the club mechanic" />
+  <img src="frontend/src/assets/story/recruits/casey-v2.png" width="30%" alt="Casey Reed, a competitive teammate" />
+  <img src="frontend/src/assets/story/recruits/viktor.png" width="30%" alt="Viktor Rook, a stern rival" />
+</p>
+
+Equipment and Flow State are unfinished experiments, with known bugs and provisional balance. See [STORY_MODE.md](STORY_MODE.md) for setup, features and limitations, and [STORY_CARS.md](STORY_CARS.md) for the drivers' cars. Concept art and portraits are AI-generated placeholders.
+
+## About RLBotGUI
 
 The official GUI for [RLBot](https://rlbot.org) v5. The RLBot GUI features:
 
