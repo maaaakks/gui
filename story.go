@@ -90,6 +90,7 @@ type StorySave struct {
 	Attempts       []StoryAttempt         `json:"attempts"`
 }
 type StoryStatus struct {
+	FreeMatch      bool    `json:"freeMatch"`
 	FlowCharge     float32 `json:"flowCharge"`
 	FlowUses       int     `json:"flowUses"`
 	ExtraBoost     float32 `json:"extraBoost"`

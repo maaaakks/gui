@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"strings"
 )
 
 type StoryRecruit struct {
@@ -47,6 +48,14 @@ func storyNamedPlayer(p PlayerJs, name string) (PlayerJs, error) {
 			return PlayerJs{}, err
 		}
 		bot.Config.Settings.Name = name
+		if bot.Config.Settings.AgentId == "SubparNova/KilobyteReduced" {
+			// RLBot reserves hivemind players by agent ID, not command line.
+			// Give every driver its own reservation so a faster-starting process
+			// cannot claim another driver's slot and apply the wrong --skill.
+			// Byte reads the RLBOT_AGENT_ID assigned by the server at startup.
+			bot.Config.Settings.AgentId = "rlstory/driver/" + strings.ToLower(strings.ReplaceAll(name, " ", "-"))
+			bot.Config.Settings.Hivemind = false
+		}
 		bot.Loadout = storyDriverLoadout(bot.Loadout, name)
 		data, err := json.Marshal(bot)
 		p.Player = data

@@ -278,6 +278,9 @@ func (a *App) SetStoryFlow(mode string, upgrade bool) error {
 func (a *App) TriggerStoryFlow() error {
 	a.storyMu.Lock()
 	defer a.storyMu.Unlock()
+	if a.storyStatus.FreeMatch {
+		return errors.New("Flow State is disabled in free matches")
+	}
 	if !a.storyStatus.Active {
 		return errors.New("Start a career match first")
 	}

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import StoryFreeMatch from "./StoryFreeMatch.svelte";
   import {
     App,
     type StoryView,
@@ -365,7 +366,7 @@
   <header class="masthead">
     <h1 class="wordmark">RLStory</h1>
     <nav aria-label="Career sections">
-      {#each [["season", "Career"], ["workshop", "Workshop"], ["recruitment", "Recruitment"], ["club", "Club"]] as [id, title]}<button
+      {#each [["season", "Career"], ["free", "Free match"], ["workshop", "Workshop"], ["recruitment", "Recruitment"], ["club", "Club"]] as [id, title]}<button
           class:active={tab === id}
           aria-current={tab === id ? "page" : undefined}
           onclick={() => (tab = id)}>{title}</button
@@ -380,7 +381,9 @@
   {#if error}<div class="notice error" role="alert">{error}</div>{/if}
   {#if view?.status.message}<div class="notice" role="status">
       <span>{view.status.message}</span
-      >{#if view.status.active}{#if !view.save.vanilla}<div class="live-flow">
+      >{#if view.status.active}{#if !view.save.vanilla && !view.status.freeMatch}<div
+            class="live-flow"
+          >
             <progress max="100" value={view.status.flowCharge}></progress><span
               >Flow {Math.round(view.status.flowCharge)}% · {2 -
                 view.status.flowUses} uses left · press R / L3 when ready</span
@@ -401,6 +404,14 @@
         >{/if}
     </div>{/if}
   {#if !view}<p class="loading">Loading career…</p>
+  {:else if tab === "free"}
+    <StoryFreeMatch
+      paths={botPaths()}
+      ranks={view.save.ranks}
+      {rankNames}
+      {locked}
+      onlaunch={refresh}
+    />
   {:else if tab === "season"}
     {#if !view.save.profileSet}<div class="setup-hint">
         <span>Choose your playlist ranks to set the starting difficulty.</span
