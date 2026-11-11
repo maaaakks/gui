@@ -530,8 +530,19 @@ func (r *StoryRuntime) render(conn rlbot.RLBotConnection, boost float32) {
 		if r.reserveFault {
 			total = "SYNCING"
 		}
+		reserveColor := &flat.ColorT{R: 95, G: 224, B: 142, A: 245}
+		ratio := r.Extra / (r.capacity() - 100)
+		if ratio < .25 {
+			reserveColor = &flat.ColorT{R: 255, G: 100, B: 100, A: 245}
+		} else if ratio <= .5 {
+			reserveColor = &flat.ColorT{R: 255, G: 185, B: 80, A: 245}
+		}
 		for i, label := range []string{reserve, total} {
-			messages = append(messages, &flat.RenderMessageT{Variety: &flat.RenderTypeT{Type: flat.RenderTypeString2D, Value: &flat.String2DT{Text: label, X: .84, Y: .74 + float32(i)*.028, Scale: .75, Foreground: &flat.ColorT{R: 255, G: 206, B: 115, A: 245}, Background: &flat.ColorT{R: 12, G: 14, B: 16, A: 150}}}})
+			color := &flat.ColorT{R: 235, G: 232, B: 220, A: 245}
+			if i == 0 {
+				color = reserveColor
+			}
+			messages = append(messages, &flat.RenderMessageT{Variety: &flat.RenderTypeT{Type: flat.RenderTypeString2D, Value: &flat.String2DT{Text: label, X: .84, Y: .74 + float32(i)*.028, Scale: .75, Foreground: color, Background: &flat.ColorT{R: 12, G: 14, B: 16, A: 150}}}})
 		}
 	}
 	if len(messages) == 0 {
