@@ -525,25 +525,34 @@ func (r *StoryRuntime) render(conn rlbot.RLBotConnection, boost float32) {
 		messages = append(messages, &flat.RenderMessageT{Variety: &flat.RenderTypeT{Type: flat.RenderTypeString2D, Value: &flat.String2DT{Text: text, X: .025, Y: .91, Scale: .8, Foreground: &flat.ColorT{R: 235, G: 232, B: 220, A: 240}, Background: &flat.ColorT{R: 12, G: 14, B: 16, A: 150}}}})
 	}
 	if !r.save.Vanilla && r.capacity() > 100 {
-		reserve := fmt.Sprintf("RESERVE %.0f / %.0f", r.Extra, r.capacity()-100)
-		total := fmt.Sprintf("TOTAL %.0f / %.0f", min(r.capacity(), boost+r.Extra), r.capacity())
-		if r.reserveFault {
-			total = "SYNCING"
-		}
 		reserveColor := &flat.ColorT{R: 95, G: 224, B: 142, A: 245}
-		ratio := r.Extra / (r.capacity() - 100)
+		ratio := max(float32(0), min(float32(1), r.Extra/(r.capacity()-100)))
 		if ratio < .25 {
 			reserveColor = &flat.ColorT{R: 255, G: 100, B: 100, A: 245}
 		} else if ratio <= .5 {
 			reserveColor = &flat.ColorT{R: 255, G: 185, B: 80, A: 245}
 		}
-		for i, label := range []string{reserve, total} {
-			color := &flat.ColorT{R: 235, G: 232, B: 220, A: 245}
-			if i == 0 {
-				color = reserveColor
-			}
-			messages = append(messages, &flat.RenderMessageT{Variety: &flat.RenderTypeT{Type: flat.RenderTypeString2D, Value: &flat.String2DT{Text: label, X: .84, Y: .74 + float32(i)*.028, Scale: .75, Foreground: color, Background: &flat.ColorT{R: 12, G: 14, B: 16, A: 150}}}})
+		// A compact card above the native boost meter, with fixed padding and
+		// independent label/value alignment rather than a text-sized backdrop.
+		const x, y, width, height = float32(.862), float32(.687), float32(.113), float32(.047)
+		rect := func(rx, ry, rw, rh float32, color *flat.ColorT) {
+			messages = append(messages, &flat.RenderMessageT{Variety: &flat.RenderTypeT{Type: flat.RenderTypeRect2D, Value: &flat.Rect2DT{X: rx, Y: ry, Width: rw, Height: rh, Color: color}}})
 		}
+		rect(x+.0015, y+.003, width, height, &flat.ColorT{R: 0, G: 0, B: 0, A: 90})
+		rect(x, y, width, height, &flat.ColorT{R: uint8(float32(reserveColor.R) * .35), G: uint8(float32(reserveColor.G) * .35), B: uint8(float32(reserveColor.B) * .35), A: 225})
+		rect(x, y, .0015, height, reserveColor)
+		rect(x+.008, y+.035, width-.016, .0025, &flat.ColorT{R: 255, G: 255, B: 255, A: 45})
+		if ratio > 0 {
+			rect(x+.008, y+.035, (width-.016)*ratio, .0025, reserveColor)
+		}
+		label := "RESERVE"
+		if r.reserveFault {
+			label = "SYNCING"
+		}
+		messages = append(messages,
+			&flat.RenderMessageT{Variety: &flat.RenderTypeT{Type: flat.RenderTypeString2D, Value: &flat.String2DT{Text: label, X: x + .008, Y: y + .010, Scale: .55, Foreground: &flat.ColorT{R: 255, G: 255, B: 255, A: 225}, Background: &flat.ColorT{A: 0}}}},
+			&flat.RenderMessageT{Variety: &flat.RenderTypeT{Type: flat.RenderTypeString2D, Value: &flat.String2DT{Text: fmt.Sprintf("%.0f / %.0f", r.Extra, r.capacity()-100), X: x + width - .008, Y: y + .006, HAlign: flat.TextHAlignRight, Scale: .8, Foreground: &flat.ColorT{R: 255, G: 255, B: 255, A: 255}, Background: &flat.ColorT{A: 0}}}},
+		)
 	}
 	if len(messages) == 0 {
 		_ = conn.SendPacket(&flat.RemoveRenderGroupT{Id: 7420})
