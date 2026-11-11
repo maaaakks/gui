@@ -111,7 +111,7 @@ func TestReserveRetriesWithoutWaitingForLowTank(t *testing.T) {
 	r.step(runtimePacket(0, 100), 0, false)
 	r.reserveFault = true
 	r.pendingSince = 0
-	r.activeTime = 2
+	r.fuelTime = 2
 	state := r.step(runtimePacket(.1, 98), 0, false)
 	if state == nil || state.CarStates[0].BoostAmount == nil || state.CarStates[0].BoostAmount.Val != 100 {
 		t.Fatal("Reserve still stranded at high boost")

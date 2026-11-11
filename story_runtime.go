@@ -27,6 +27,8 @@ type StoryRuntime struct {
 	field                                      *flat.FieldInfoT
 	activeTime, lastSeconds                    float32
 	wasActive, started                         bool
+	fuelTime                                   float32
+	wasFuelActive                              bool
 	previousStats                              flat.ScoreInfoT
 	previousTouches                            map[int]float32
 	cooldown                                   map[string]float32
@@ -211,6 +213,41 @@ func (r *StoryRuntime) humanPickedPad(p *flat.GamePacketT, human int) bool {
 	}
 	return false
 }
+
+// At 100 native boost Rocket League leaves the pickup active. Briefly make
+// room only while touching an available large pad, so the game itself collects
+// it and owns the normal respawn timer for every player.
+func (r *StoryRuntime) touchingFullPad(p *flat.GamePacketT, human int) bool {
+	car := p.Players[human]
+	if r.field == nil || car.Physics == nil || car.Physics.Location == nil {
+		return false
+	}
+	for i, pad := range p.BoostPads {
+		if pad == nil || !pad.IsActive || i >= len(r.field.BoostPads) {
+			continue
+		}
+		info := r.field.BoostPads[i]
+		if info == nil || !info.IsFullBoost || info.Location == nil {
+			continue
+		}
+		pos, loc := car.Physics.Location, info.Location
+		dx, dy := pos.X-loc.X, pos.Y-loc.Y
+		if dx*dx+dy*dy > 200*200 || math.Abs(float64(pos.Z-loc.Z)) > 150 {
+			continue
+		}
+		nearest := true
+		distance := storyDistance2(pos, loc)
+		for j, other := range p.Players {
+			if j != human && other.Physics != nil && storyDistance2(other.Physics.Location, loc) <= distance+100*100 {
+				nearest = false
+			}
+		}
+		if nearest {
+			return true
+		}
+	}
+	return false
+}
 func (r *StoryRuntime) step(p *flat.GamePacketT, human int, trigger bool) *flat.DesiredGameStateT {
 	if p.MatchInfo == nil || human < 0 || human >= len(p.Players) {
 		return nil
@@ -221,6 +258,7 @@ func (r *StoryRuntime) step(p *flat.GamePacketT, human int, trigger bool) *flat.
 	r.wasBoosting = boosting
 	phase := p.MatchInfo.MatchPhase
 	active := phase == flat.MatchPhaseActive
+	fuelActive := active || phase == flat.MatchPhaseKickoff
 	dt := p.MatchInfo.SecondsElapsed - r.lastSeconds
 	r.lastSeconds = p.MatchInfo.SecondsElapsed
 	if dt < 0 || dt > 0.25 {
@@ -231,6 +269,10 @@ func (r *StoryRuntime) step(p *flat.GamePacketT, human int, trigger bool) *flat.
 		r.activeTime += dt
 	}
 	r.wasActive = active
+	if fuelActive && r.wasFuelActive {
+		r.fuelTime += dt
+	}
+	r.wasFuelActive = fuelActive
 	if r.save.Vanilla {
 		return nil
 	}
@@ -257,7 +299,7 @@ func (r *StoryRuntime) step(p *flat.GamePacketT, human int, trigger bool) *flat.
 		// The refill can have arrived even if the native gauge never rises:
 		// holding normal boost consumes 100/3 units per active second.
 		// Account only for intervals bracketed by reported held inputs.
-		if active && wasBoosting && boosting {
+		if fuelActive && wasBoosting && boosting {
 			r.pendingSpent += (100.0 / 3.0) * dt
 		}
 		// A fixed ten-point tolerance acknowledges tiny top-ups before they
@@ -283,7 +325,7 @@ func (r *StoryRuntime) step(p *flat.GamePacketT, human int, trigger bool) *flat.
 			}
 			r.Extra = max(float32(0), r.Extra-debit)
 			r.pendingAmount = 0
-		} else if r.activeTime-r.pendingSince > storyReserveAckTimeout {
+		} else if r.fuelTime-r.pendingSince > storyReserveAckTimeout {
 			r.pendingAmount = 0
 			r.reserveFault = true
 			r.LastEvent = "Auxiliary transfer delayed; retrying"
@@ -361,10 +403,14 @@ func (r *StoryRuntime) step(p *flat.GamePacketT, human int, trigger bool) *flat.
 	// Never refill during a pause, demolition or an Overdrive activation.
 	// Retry a missed transfer after a bounded delay.
 	// Keep this bounded by the native deficit and the remaining reserve.
-	if active && r.reserveFault && target <= 99.5 && r.activeTime-r.pendingSince >= storyReserveRetryDelay {
+	padContact := fuelActive && car.DemolishedTimeout <= 0 && r.OverdriveUntil == 0 && r.Extra < storyModuleValue(r.save, "reserve") && r.touchingFullPad(p, human)
+	if padContact && target >= 99.5 {
+		target = 99
+	}
+	if fuelActive && r.reserveFault && target <= 99.5 && r.fuelTime-r.pendingSince >= storyReserveRetryDelay {
 		r.reserveFault = false
 	}
-	if active && car.DemolishedTimeout <= 0 && target <= 99.5 && r.Extra > 0 && r.pendingAmount == 0 && !r.reserveFault && r.OverdriveUntil == 0 {
+	if fuelActive && !padContact && car.DemolishedTimeout <= 0 && target <= 99.5 && r.Extra > 0 && r.pendingAmount == 0 && !r.reserveFault && r.OverdriveUntil == 0 {
 		// The core truncates boost commands to whole units. Never send a
 		// fractional refill which would round below the current native tank
 		// and actually remove fuel. A sub-unit remainder waits until useful.
@@ -375,7 +421,7 @@ func (r *StoryRuntime) step(p *flat.GamePacketT, human int, trigger bool) *flat.
 			r.pendingTarget = nativeTarget
 			r.pendingLowest = car.Boost
 			r.pendingSpent = 0
-			r.pendingSince = r.activeTime
+			r.pendingSince = r.fuelTime
 			target = nativeTarget
 		}
 	}

@@ -101,7 +101,7 @@ func TestReserveCanRecoverWithoutRestartingMatch(t *testing.T) {
 	r := newStoryRuntime(s, StoryChallenge{})
 	r.step(runtimePacket(0, 100), 0, false)
 	r.reserveFault = true
-	r.activeTime = 2
+	r.fuelTime = 2
 	r.pendingSince = 0
 	state := r.step(runtimePacket(.1, 85), 0, false)
 	if state == nil || state.CarStates[0].BoostAmount == nil || state.CarStates[0].BoostAmount.Val != 100 || r.reserveFault {
