@@ -267,12 +267,16 @@ func (r *StoryRuntime) step(p *flat.GamePacketT, human int, trigger bool) *flat.
 		// target. A rise from the lowest observed native level also proves
 		// that the pending top-up arrived; do not require a near-100 sample.
 		rose := car.Boost > r.pendingLowest+min(float32(0.1), r.pendingAmount/4)
-		if car.Boost+r.pendingSpent >= r.pendingTarget-tolerance || rose {
-			debit := r.pendingAmount
-			if r.pendingSpent > 0 && !r.humanPickedPad(p, human) {
-				// An absolute target applied later can deliver more than the
-				// original deficit. Account for it so latency creates no fuel.
-				debit = max(debit, car.Boost+r.pendingSpent-(r.pendingTarget-r.pendingAmount))
+		// The core applies integer boost targets asynchronously. At 120 Hz a
+		// request for one unit can deliver only a fraction before the next
+		// packet. Debit observed delivery, not a minimum of the request size.
+		debit := max(float32(0), car.Boost+r.pendingSpent-(r.pendingTarget-r.pendingAmount))
+		pickedPad := r.humanPickedPad(p, human)
+		if pickedPad || (debit > 0.05 && (car.Boost+r.pendingSpent >= r.pendingTarget-tolerance || rose)) {
+			// Native pad fuel cannot be distinguished from a simultaneous
+			// transfer. Leave it free rather than charging it to the reserve.
+			if pickedPad {
+				debit = 0
 			}
 			if debit > r.Extra {
 				target = max(float32(0), target-(debit-r.Extra))
@@ -361,13 +365,19 @@ func (r *StoryRuntime) step(p *flat.GamePacketT, human int, trigger bool) *flat.
 		r.reserveFault = false
 	}
 	if active && car.DemolishedTimeout <= 0 && target <= 99.5 && r.Extra > 0 && r.pendingAmount == 0 && !r.reserveFault && r.OverdriveUntil == 0 {
-		amount := min(r.Extra, 100-target)
-		r.pendingAmount = amount
-		r.pendingTarget = target + amount
-		r.pendingLowest = car.Boost
-		r.pendingSpent = 0
-		r.pendingSince = r.activeTime
-		target += amount
+		// The core truncates boost commands to whole units. Never send a
+		// fractional refill which would round below the current native tank
+		// and actually remove fuel. A sub-unit remainder waits until useful.
+		nativeTarget := float32(math.Floor(float64(min(float32(100), target+r.Extra))))
+		amount := nativeTarget - target
+		if amount > 0.05 {
+			r.pendingAmount = amount
+			r.pendingTarget = nativeTarget
+			r.pendingLowest = car.Boost
+			r.pendingSpent = 0
+			r.pendingSince = r.activeTime
+			target = nativeTarget
+		}
 	}
 	cars := make([]*flat.DesiredCarStateT, len(p.Players))
 	changed := false

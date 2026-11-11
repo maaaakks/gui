@@ -1,6 +1,9 @@
 package main
 
-import "testing"
+import (
+	"math"
+	"testing"
+)
 
 func TestReserveConsumedBeforeMainTank(t *testing.T) {
 	s := newStorySave()
@@ -21,10 +24,10 @@ func TestReserveConsumedBeforeMainTank(t *testing.T) {
 	if r.Extra != 25 {
 		t.Fatal("Unapplied top-up consumed reserve")
 	}
-	// The next packet includes consumption since the refill was applied.
+	// Only 0.7 was delivered in the next packet; do not charge the full request.
 	r.step(runtimePacket(.12, 99.7), 0, false)
-	if r.Extra != 24 {
-		t.Fatal("Applied top-up must consume exactly one reserve boost", r.Extra)
+	if math.Abs(float64(r.Extra-24.3)) > .001 {
+		t.Fatal("Charge only observed native fuel delivery", r.Extra)
 	}
 	// Exhausting the reserve must not generate any further fuel.
 	r.Extra = 0

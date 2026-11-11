@@ -73,7 +73,8 @@ On Windows, the input fallback uses **R** or **L3**, only while Rocket League is
 
 ## Known issues and limits
 
-- The player reported reserve fuel working initially and then stopping, and confusing or unreliable Flow activation. The latest changes add bounded transfer retries, protect full-tank Surge and held initial inputs, and clarify charging versus activation. Regression tests pass; **these reports still need to be reproduced and verified in a real match**.
+- Passive native-packet capture reproduced excessive reserve consumption: a requested one-point refill could deliver only about 0.28 points while boosting, but was charged as a full point. Transfers now debit observed delivery, accounting for held boost consumption. Whole-unit targets also prevent small reserve remainders from being truncated below the current tank and removing fuel. Regressions cover the captured 99-point plateau, reward overflow, integer targets and delayed application. **The corrected build still needs player validation in a real match.**
+- Confusing or unreliable Flow activation remains under investigation. Full-tank Surge retains its charge, initial held inputs do not activate it, and charging versus activation is shown separately; these protections have synthetic regression coverage.
 - The native fuel meter remains capped at 100. Extra fuel is tracked separately and shown in a small Story HUD; keeping the native meter near 100 uses state-setting packets and is subject to packet timing.
 - A reserve is finite, refills on large pads and is emptied by demolition. This is not permanent infinite boost.
 - Reserve top-ups begin at 99.5 native boost. Acknowledgements account for reported sustained boost use; ignored transfers time out after 120 ms and retry from 200 ms instead of waiting up to a second. These are responsiveness changes, not larger fuel rewards; native packet timing still needs in-game validation.
