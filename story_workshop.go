@@ -18,7 +18,7 @@ type StoryModule struct {
 }
 
 var storyModules = []StoryModule{
-	{"reserve", "Auxiliary tank", "A full extra fuel reserve at match start. Refills on large pads and stores reward overflow. Used first to keep the main tank near 100 until the reserve runs out.", []float32{25, 50, 75}, 2, true, "Main tank stays at 100; total fuel capacity is 125 / 150 / 175."},
+	{"reserve", "Auxiliary tank", "A full extra fuel reserve at match start. Large pads refill it; small pads store up to 12 overflow boost, even at a full main tank. Also stores equipment rewards. Used first to keep the main tank near 100.", []float32{25, 50, 75}, 2, true, "Total fuel capacity is 125 / 150 / 175. Reserve and total fuel appear above the native boost gauge."},
 	{"saves", "Defensive recovery", "Recover boost after a save.", []float32{15, 20, 25}, 2, true, "8-second cooldown. Action rewards share a 60-boost rolling-minute cap."},
 	{"shots", "Shooting rhythm", "Recover boost after a shot on target.", []float32{8, 10, 12}, 2, true, "6-second cooldown. Action rewards share a 60-boost rolling-minute cap."},
 	{"passing", "Link-up play", "Recover boost when a teammate receives your pass, before any goal.", []float32{15, 20, 25}, 5, true, "8-second cooldown. Short accidental contacts do not count. Shares the 60-boost rolling-minute action cap."},

@@ -34,6 +34,9 @@ type StoryRuntime struct {
 	cooldown                                   map[string]float32
 	gains                                      []storyFuelGain
 	lastPads                                   []bool
+	previousFuel                               float32
+	padOpening                                 int
+	padOpeningFuel, padOpeningSpent            float32
 	passAt                                     float32
 	passBall                                   uint32
 	passPosition                               *flat.Vector3T
@@ -53,7 +56,7 @@ type StoryRuntime struct {
 }
 
 func newStoryRuntime(save StorySave, c StoryChallenge) *StoryRuntime {
-	return &StoryRuntime{itemDown: true, Extra: storyModuleValue(save, "reserve"), save: save, challenge: c, previousTouches: map[int]float32{}, cooldown: map[string]float32{}}
+	return &StoryRuntime{itemDown: true, padOpening: -1, Extra: storyModuleValue(save, "reserve"), save: save, challenge: c, previousTouches: map[int]float32{}, cooldown: map[string]float32{}}
 }
 func (r *StoryRuntime) capacity() float32 { return 100 + storyModuleValue(r.save, "reserve") }
 func (r *StoryRuntime) gain(id string, amount, cooldown float32, target *float32, frequent bool) {
@@ -145,7 +148,7 @@ func (r *StoryRuntime) chargeAction() {
 		r.cooldown["flow-action"] = r.activeTime
 	}
 }
-func (r *StoryRuntime) pads(p *flat.GamePacketT, human int) {
+func (r *StoryRuntime) pads(p *flat.GamePacketT, human int, spent float32) {
 	if len(r.lastPads) != len(p.BoostPads) {
 		r.lastPads = make([]bool, len(p.BoostPads))
 		for i, pad := range p.BoostPads {
@@ -159,7 +162,7 @@ func (r *StoryRuntime) pads(p *flat.GamePacketT, human int) {
 	for i, pad := range p.BoostPads {
 		collected := r.lastPads[i] && !pad.IsActive
 		r.lastPads[i] = pad.IsActive
-		if !collected || i >= len(r.field.BoostPads) || !r.field.BoostPads[i].IsFullBoost {
+		if !collected || i >= len(r.field.BoostPads) {
 			continue
 		}
 		h := p.Players[human]
@@ -179,9 +182,31 @@ func (r *StoryRuntime) pads(p *flat.GamePacketT, human int) {
 		}
 		if unambiguous {
 			r.pendingAmount = 0
-			r.Extra = storyModuleValue(r.save, "reserve")
+			capacity := storyModuleValue(r.save, "reserve")
+			if r.field.BoostPads[i].IsFullBoost {
+				r.Extra = capacity
+				r.LastEvent = "Auxiliary tank refilled"
+			} else {
+				// Native boost already includes the portion received by the
+				// main tank. Store only the unused part of this twelve-unit pad.
+				nativeGain := max(float32(0), h.Boost-r.previousFuel+spent)
+				if r.padOpening == i {
+					// Measure from before the artificial opening, returning its
+					// one point without counting native pad fuel twice.
+					nativeGain = max(float32(0), h.Boost-r.padOpeningFuel+r.padOpeningSpent)
+				}
+				overflow := 12 - nativeGain
+				added := min(max(float32(0), min(float32(12), overflow)), max(float32(0), capacity-r.Extra))
+				r.Extra += added
+				if added > 0 {
+					r.LastEvent = fmt.Sprintf("Auxiliary tank +%.0f boost", added)
+				}
+			}
+			if r.padOpening == i {
+				r.padOpening = -1
+				r.padOpeningSpent = 0
+			}
 			r.reserveFault = false
-			r.LastEvent = "Auxiliary tank refilled"
 		}
 	}
 }
@@ -215,24 +240,28 @@ func (r *StoryRuntime) humanPickedPad(p *flat.GamePacketT, human int) bool {
 }
 
 // At 100 native boost Rocket League leaves the pickup active. Briefly make
-// room only while touching an available large pad, so the game itself collects
+// room only while touching an available pad, so the game itself collects
 // it and owns the normal respawn timer for every player.
-func (r *StoryRuntime) touchingFullPad(p *flat.GamePacketT, human int) bool {
+func (r *StoryRuntime) touchingPad(p *flat.GamePacketT, human int) int {
 	car := p.Players[human]
 	if r.field == nil || car.Physics == nil || car.Physics.Location == nil {
-		return false
+		return -1
 	}
 	for i, pad := range p.BoostPads {
 		if pad == nil || !pad.IsActive || i >= len(r.field.BoostPads) {
 			continue
 		}
 		info := r.field.BoostPads[i]
-		if info == nil || !info.IsFullBoost || info.Location == nil {
+		if info == nil || info.Location == nil {
 			continue
 		}
 		pos, loc := car.Physics.Location, info.Location
 		dx, dy := pos.X-loc.X, pos.Y-loc.Y
-		if dx*dx+dy*dy > 200*200 || math.Abs(float64(pos.Z-loc.Z)) > 150 {
+		radius, height := float32(120), float64(100)
+		if info.IsFullBoost {
+			radius, height = 200, 150
+		}
+		if dx*dx+dy*dy > radius*radius || math.Abs(float64(pos.Z-loc.Z)) > height {
 			continue
 		}
 		nearest := true
@@ -243,10 +272,10 @@ func (r *StoryRuntime) touchingFullPad(p *flat.GamePacketT, human int) bool {
 			}
 		}
 		if nearest {
-			return true
+			return i
 		}
 	}
-	return false
+	return -1
 }
 func (r *StoryRuntime) step(p *flat.GamePacketT, human int, trigger bool) *flat.DesiredGameStateT {
 	if p.MatchInfo == nil || human < 0 || human >= len(p.Players) {
@@ -276,6 +305,7 @@ func (r *StoryRuntime) step(p *flat.GamePacketT, human int, trigger bool) *flat.
 	if r.save.Vanilla {
 		return nil
 	}
+	defer func() { r.previousFuel = car.Boost }()
 	target := car.Boost
 	item := car.LastInput != nil && car.LastInput.UseItem
 	pressed := item && !r.itemDown
@@ -335,9 +365,18 @@ func (r *StoryRuntime) step(p *flat.GamePacketT, human int, trigger bool) *flat.
 	if car.DemolishedTimeout > 0 {
 		r.Extra = 0
 		r.pendingAmount = 0
+		r.padOpening = -1
+		r.padOpeningSpent = 0
 		r.passPending = false
 	}
-	r.pads(p, human)
+	spent := float32(0)
+	if fuelActive && wasBoosting && boosting {
+		spent = (100.0 / 3.0) * dt
+	}
+	if r.padOpening >= 0 {
+		r.padOpeningSpent += spent
+	}
+	r.pads(p, human, spent)
 	flowReady := !r.save.Vanilla && storyWins(r.save) >= 5
 	if active && flowReady && r.OverdriveUntil <= r.activeTime {
 		r.Charge = min(float32(100), r.Charge+dt)
@@ -403,8 +442,21 @@ func (r *StoryRuntime) step(p *flat.GamePacketT, human int, trigger bool) *flat.
 	// Never refill during a pause, demolition or an Overdrive activation.
 	// Retry a missed transfer after a bounded delay.
 	// Keep this bounded by the native deficit and the remaining reserve.
-	padContact := fuelActive && car.DemolishedTimeout <= 0 && r.OverdriveUntil == 0 && r.Extra < storyModuleValue(r.save, "reserve") && r.touchingFullPad(p, human)
+	contactPad := -1
+	if fuelActive && car.DemolishedTimeout <= 0 && r.OverdriveUntil == 0 && r.Extra < storyModuleValue(r.save, "reserve") {
+		contactPad = r.touchingPad(p, human)
+	}
+	padContact := contactPad >= 0
+	if r.padOpening != contactPad {
+		r.padOpening = -1
+		r.padOpeningSpent = 0
+	}
 	if padContact && target >= 99.5 {
+		if r.padOpening != contactPad {
+			r.padOpeningFuel = target
+			r.padOpeningSpent = 0
+		}
+		r.padOpening = contactPad
 		target = 99
 	}
 	if fuelActive && r.reserveFault && target <= 99.5 && r.fuelTime-r.pendingSince >= storyReserveRetryDelay {
@@ -468,15 +520,19 @@ func (r *StoryRuntime) render(conn rlbot.RLBotConnection, boost float32) {
 			text = "OVERDRIVE"
 		}
 	}
-	if r.capacity() > 100 {
-		text += fmt.Sprintf("   FUEL %.0f/%.0f · RESERVE %.0f", min(r.capacity(), boost+r.Extra), r.capacity(), r.Extra)
-		if r.reserveFault {
-			text += " · SYNCING"
-		}
-	}
 	messages := []*flat.RenderMessageT{}
 	if text != "" {
 		messages = append(messages, &flat.RenderMessageT{Variety: &flat.RenderTypeT{Type: flat.RenderTypeString2D, Value: &flat.String2DT{Text: text, X: .025, Y: .91, Scale: .8, Foreground: &flat.ColorT{R: 235, G: 232, B: 220, A: 240}, Background: &flat.ColorT{R: 12, G: 14, B: 16, A: 150}}}})
+	}
+	if !r.save.Vanilla && r.capacity() > 100 {
+		reserve := fmt.Sprintf("RESERVE %.0f / %.0f", r.Extra, r.capacity()-100)
+		total := fmt.Sprintf("TOTAL %.0f / %.0f", min(r.capacity(), boost+r.Extra), r.capacity())
+		if r.reserveFault {
+			total = "SYNCING"
+		}
+		for i, label := range []string{reserve, total} {
+			messages = append(messages, &flat.RenderMessageT{Variety: &flat.RenderTypeT{Type: flat.RenderTypeString2D, Value: &flat.String2DT{Text: label, X: .84, Y: .74 + float32(i)*.028, Scale: .75, Foreground: &flat.ColorT{R: 255, G: 206, B: 115, A: 245}, Background: &flat.ColorT{R: 12, G: 14, B: 16, A: 150}}}})
+		}
 	}
 	if len(messages) == 0 {
 		_ = conn.SendPacket(&flat.RemoveRenderGroupT{Id: 7420})

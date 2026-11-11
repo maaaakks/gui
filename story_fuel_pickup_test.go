@@ -1,6 +1,7 @@
 package main
 
 import (
+	"math"
 	"testing"
 
 	"github.com/RLBot/go-interface/flat"
@@ -47,8 +48,8 @@ func TestLargePadCanRefillReserveAtFullNativeTank(t *testing.T) {
 	}
 }
 
-func TestPickupOpeningOnlyAtEligibleLargePad(t *testing.T) {
-	for _, name := range []string{"far", "airborne", "small", "unavailable", "full reserve", "vanilla", "paused", "countdown", "demolished", "contested", "overdrive"} {
+func TestPickupOpeningOnlyAtEligiblePad(t *testing.T) {
+	for _, name := range []string{"far", "airborne", "unavailable", "full reserve", "vanilla", "paused", "countdown", "demolished", "contested", "overdrive"} {
 		t.Run(name, func(t *testing.T) {
 			r := reservePickupRuntime()
 			r.Extra = 10
@@ -58,8 +59,6 @@ func TestPickupOpeningOnlyAtEligibleLargePad(t *testing.T) {
 				p.Players[0].Physics.Location.X = 500
 			case "airborne":
 				p.Players[0].Physics.Location.Z = 500
-			case "small":
-				r.field.BoostPads[0].IsFullBoost = false
 			case "unavailable":
 				p.BoostPads[0].IsActive = false
 			case "full reserve":
@@ -81,6 +80,67 @@ func TestPickupOpeningOnlyAtEligibleLargePad(t *testing.T) {
 				t.Fatal("Ineligible pad interaction altered native fuel")
 			}
 		})
+	}
+}
+
+func TestSmallPadsRefillReserveAt100(t *testing.T) {
+	for _, delayed := range []bool{false, true} {
+		r := reservePickupRuntime()
+		r.field.BoostPads[0].IsFullBoost = false
+		r.Extra = 0
+		state := r.step(pickupPacket(.01, 100, true), 0, false)
+		if state == nil || state.CarStates[0].BoostAmount.Val != 99 || r.Extra != 0 {
+			t.Fatal("Full native tank must allow a small-pad pickup, without early rewards")
+		}
+		if delayed {
+			if state = r.step(pickupPacket(.02, 99, true), 0, false); state != nil {
+				t.Fatal("Top-up prevented small-pad pickup")
+			}
+		}
+		r.step(pickupPacket(.03, 100, false), 0, false)
+		if r.Extra != 12 {
+			t.Fatal("Small pad at 100 must store 12 including the artificial opening", delayed, r.Extra)
+		}
+		r.step(pickupPacket(.04, 100, false), 0, false)
+		if r.Extra != 12 {
+			t.Fatal("Cooling pad awarded fuel repeatedly")
+		}
+	}
+}
+
+func TestSmallPadStoresOnlyNativeOverflow(t *testing.T) {
+	for _, sample := range []struct{ before, reserve, want float32 }{{88, 0, 0}, {93, 0, 5}, {98, 10, 20}, {100, 24, 25}, {100, 25, 25}} {
+		r := reservePickupRuntime()
+		r.field.BoostPads[0].IsFullBoost = false
+		r.Extra = sample.reserve
+		r.step(pickupPacket(.01, sample.before, true), 0, false)
+		r.step(pickupPacket(.02, 100, false), 0, false)
+		if r.Extra != sample.want {
+			t.Fatal("Small pad duplicated native fuel or exceeded reserve capacity", sample, r.Extra)
+		}
+	}
+}
+
+func TestSmallPadOverflowAccountsForBoostHeldDuringOpening(t *testing.T) {
+	for _, delayed := range []bool{false, true} {
+		r := reservePickupRuntime()
+		r.field.BoostPads[0].IsFullBoost = false
+		r.Extra = 0
+		p := pickupPacket(.01, 100, true)
+		p.Players[0].LastInput = &flat.ControllerStateT{Boost: true}
+		r.step(p, 0, false)
+		if delayed {
+			p = pickupPacket(.02, 99, true)
+			p.Players[0].LastInput = &flat.ControllerStateT{Boost: true}
+			r.step(p, 0, false)
+		}
+		p = pickupPacket(.03, 100, false)
+		p.Players[0].LastInput = &flat.ControllerStateT{Boost: true}
+		r.step(p, 0, false)
+		want := float32(12 - 2.0/3.0)
+		if math.Abs(float64(r.Extra-want)) > .001 {
+			t.Fatal("Opening or held boost caused a fuel accounting error", delayed, r.Extra, want)
+		}
 	}
 }
 
